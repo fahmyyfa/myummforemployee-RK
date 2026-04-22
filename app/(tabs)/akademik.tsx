@@ -1,182 +1,175 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useRouter } from "expo-router"; // Wajib diimport
+import React, { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function AkademikMain() {
-  const router = useRouter();
+export default function AkademikScreen() {
+  const [activeTab, setActiveTab] = useState("OBE");
+  const router = useRouter(); // Inisialisasi router
 
-  // 1. TARUH DATA DI SINI (Sebelum return)
-  const perwalianMenu = [
-    { label: "Mahasiswa Aktif", icon: "people", color: "#D32F2F" },
-    { label: "Tugas Akhir", icon: "school", color: "#1976D2" },
-    { label: "Konsultasi", icon: "chatbubbles", color: "#388E3C" },
-    { label: "Alumni", icon: "medal", color: "#F57C00" },
-    { label: "Laporan", icon: "stats-chart", color: "#7B1FA2" },
-  ];
+  // --- SUB COMPONENTS (Ditaruh di dalam agar akses router mudah) ---
+  const RenderOBE = () => (
+    <View style={styles.card}>
+      <View style={styles.iconCircle}>
+        <Ionicons name="calendar" size={24} color="#00468C" />
+      </View>
+      <View style={{ flex: 1, marginLeft: 15 }}>
+        <Text style={styles.cardTitle}>Jadwal Kuliah</Text>
+        <Text style={styles.cardDesc}>
+          Kelola dan pantau jadwal mengajar harian Anda secara real-time.
+        </Text>
+      </View>
+      <TouchableOpacity
+        style={styles.btnSmall}
+        onPress={() => router.push("/akademik_jadwal")} // Arahkan ke file akademik_jadwal.tsx
+      >
+        <Text style={styles.btnText}>Lihat Semua</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const RenderLaporan = () => (
+    <View style={styles.card}>
+      <View style={[styles.iconCircle, { backgroundColor: "#E8F5E9" }]}>
+        <Ionicons name="analytics" size={24} color="#2E7D32" />
+      </View>
+      <View style={{ flex: 1, marginLeft: 15 }}>
+        <Text style={styles.cardTitle}>Riwayat Laporan</Text>
+        <Text style={styles.cardDesc}>
+          Pantau pencapaian akademik mahasiswa dan kinerja dosen.
+        </Text>
+      </View>
+      <TouchableOpacity
+        style={[styles.btnSmall, { backgroundColor: "#2E7D32" }]}
+        onPress={() => router.push("/laporan_semester")} // Arahkan ke file laporan_semester.tsx
+      >
+        <Text style={styles.btnText}>Buka</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F8F9FA" }}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Akademik</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <View style={styles.container}>
+      <Text style={styles.headerTitle}>Akademik</Text>
 
-      <ScrollView
-        contentContainerStyle={{ padding: 20 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Tab Menu */}
-        <View style={styles.tabRow}>
-          <Text style={styles.tabActive}>Perkuliahan</Text>
-          <Text style={styles.tabInactive}>OBE</Text>
-        </View>
-
-        {/* Card Jadwal Kuliah */}
-        <View style={styles.cardWhite}>
-          <View style={styles.cardHeader}>
-            <View style={styles.iconBox}>
-              <Ionicons name="calendar" size={24} color="#00468C" />
-            </View>
-            <Text style={styles.cardTitle}>Jadwal Kuliah</Text>
-          </View>
-          <Text style={styles.cardDesc}>
-            Kelola dan pantau jadwal mengajar harian Anda secara real-time.
-          </Text>
+      {/* TAB MODERN (SEGMENTED CONTROL) */}
+      <View style={styles.tabWrapper}>
+        <View style={styles.tabBackground}>
           <TouchableOpacity
-            style={styles.btnPrimary}
-            onPress={() => router.push("/akademik_jadwal")}
+            onPress={() => setActiveTab("OBE")}
+            style={[styles.tabItem, activeTab === "OBE" && styles.tabActive]}
           >
-            <Text style={styles.btnText}>Lihat Semua</Text>
+            <Ionicons
+              name="layers-outline"
+              size={18}
+              color={activeTab === "OBE" ? "#00468C" : "#8E8E93"}
+            />
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "OBE" && styles.tabTextActive,
+              ]}
+            >
+              Pelaksanaan (OBE)
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setActiveTab("Laporan")}
+            style={[
+              styles.tabItem,
+              activeTab === "Laporan" && styles.tabActive,
+            ]}
+          >
+            <Ionicons
+              name="document-text-outline"
+              size={18}
+              color={activeTab === "Laporan" ? "#00468C" : "#8E8E93"}
+            />
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "Laporan" && styles.tabTextActive,
+              ]}
+            >
+              Laporan
+            </Text>
           </TouchableOpacity>
         </View>
+      </View>
 
-        {/* 2. AREA PERWALIAN (REVISI) */}
-        <View style={styles.cardBlue}>
-          <Text style={styles.cardTitleWhite}>Perwalian</Text>
-          <Text style={styles.cardYearWhite}>Tahun Akademik 2025/2026</Text>
-          <View style={styles.iconGrid}>
-            {perwalianMenu.map((item, idx) => (
-              <TouchableOpacity key={idx} style={styles.iconItem}>
-                <View style={styles.iconWhiteGlow}>
-                  <Ionicons
-                    name={item.icon as any}
-                    size={20}
-                    color={item.color}
-                  />
-                </View>
-                <Text style={styles.iconLabel}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      {/* KONTEN */}
+      <View style={styles.content}>
+        {activeTab === "OBE" ? <RenderOBE /> : <RenderLaporan />}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 20,
-    paddingTop: 50,
-    backgroundColor: "#FFF",
-  },
-  headerTitle: { fontSize: 18, fontWeight: "bold" },
-  tabRow: {
-    flexDirection: "row",
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEE",
-  },
-  tabActive: {
-    color: "#00468C",
-    fontWeight: "bold",
-    borderBottomWidth: 2,
-    borderBottomColor: "#00468C",
-    paddingBottom: 10,
-    marginRight: 20,
-  },
-  tabInactive: { color: "#AAA", paddingBottom: 10 },
-  cardWhite: {
-    backgroundColor: "#FFF",
-    padding: 20,
-    borderRadius: 20,
-    elevation: 3,
-    marginBottom: 20,
-  },
-  cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  iconBox: {
-    backgroundColor: "#E8F0F8",
-    padding: 10,
-    borderRadius: 12,
-    marginRight: 15,
-  },
-  cardTitle: { fontSize: 18, fontWeight: "bold" },
-  cardDesc: { color: "#777", fontSize: 12, marginBottom: 15 },
-  btnPrimary: {
-    backgroundColor: "#00468C",
-    padding: 10,
-    borderRadius: 10,
-    alignSelf: "flex-end",
-  },
-  btnText: { color: "#FFF", fontWeight: "bold", fontSize: 12 },
-  cardBlue: {
-    backgroundColor: "#00468C",
-    padding: 22,
-    borderRadius: 25,
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-  },
-  cardTitleWhite: {
-    color: "#FFF",
+  container: { flex: 1, backgroundColor: "#F8F9FA", paddingTop: 60 },
+  headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 4,
-  },
-  cardYearWhite: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 12,
+    textAlign: "center",
     marginBottom: 25,
   },
-  iconGrid: {
+  tabWrapper: { paddingHorizontal: 20, marginBottom: 20 },
+  tabBackground: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    backgroundColor: "#EEEFf2",
+    padding: 4,
+    borderRadius: 16,
+    height: 52,
   },
-  iconItem: { alignItems: "center", width: "19%" },
-  iconWhiteGlow: {
-    backgroundColor: "#FFF",
-    width: 45,
-    height: 45,
-    borderRadius: 12,
+  tabItem: {
+    flex: 1,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
-    elevation: 4,
-    shadowColor: "#FFF",
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
+    borderRadius: 12,
   },
-  iconLabel: {
-    color: "#FFF",
-    fontSize: 9,
-    textAlign: "center",
-    fontWeight: "600",
-    lineHeight: 12,
+  tabActive: {
+    backgroundColor: "#FFF",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
+  tabText: { fontSize: 13, fontWeight: "600", color: "#8E8E93", marginLeft: 8 },
+  tabTextActive: { color: "#00468C" },
+  content: { padding: 20 },
+  card: {
+    backgroundColor: "#FFF",
+    padding: 20,
+    borderRadius: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+  },
+  iconCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 15,
+    backgroundColor: "#E3F2FD",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cardTitle: { fontSize: 16, fontWeight: "bold", color: "#333" },
+  cardDesc: {
+    fontSize: 11,
+    color: "#888",
+    marginTop: 4,
+    lineHeight: 16,
+    paddingRight: 10,
+  },
+  btnSmall: {
+    backgroundColor: "#00468C",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  btnText: { color: "#FFF", fontWeight: "bold", fontSize: 11 },
 });

@@ -15,8 +15,18 @@ import { supabase } from "../../lib/supabase";
 export default function BerandaScreen() {
   const router = useRouter(); // Tambahkan baris ini
   const [userData, setUserData] = useState<any>(null);
+  const [notifList, setNotifList] = useState<any[]>([]);
 
   const handleServicePress = (label: string) => {
+    if (label === "Jadwal Kuliah") {
+      router.push("/akademik_jadwal");
+    }
+    if (label === "Aktivitas") {
+      router.push("/aktivitas");
+    }
+    if (label === "Kinerja") {
+      router.push("/aktivitas");
+    }
     if (label === "Presensi") {
       router.push("/presensi_kehadiran");
     }
@@ -30,40 +40,59 @@ export default function BerandaScreen() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (!session?.user) return;
+    const userId = session?.user.id;
 
-    const { data } = await supabase
+    if (!userId) return;
+
+    // 1. Ambil Profil
+    const { data: profile } = await supabase
       .from("profil")
       .select("*")
-      .eq("id", session.user.id)
+      .eq("id", userId)
       .single();
-    if (data) setUserData(data);
+    if (profile) setUserData(profile);
+
+    // 2. Ambil Notifikasi (Debug Version)
+    const { data: dbNotif, error } = await supabase
+      .from("notifikasi")
+      .select("*")
+      .eq("user_id", userId) // Pastikan ini cocok dengan user yang login
+      .order("created_at", { ascending: false })
+      .limit(2);
+
+    if (error) {
+      console.error("Gagal tarik notif:", error.message);
+    } else {
+      console.log("Notif ditemukan:", dbNotif?.length);
+      setNotifList(dbNotif || []); // Update state di sini
+    }
   }
 
   const quickServices = [
     {
       label: "Jadwal Kuliah",
-      icon: "calendar",
-      color: "#D32F2F",
-      bg: "#FFEBEE",
+      icon: "calendar-outline",
+      bg: "#FFF0F0",
+      color: "#FF4444",
     },
     {
-      label: "Laporan OBE",
-      icon: "document-text",
-      color: "#1976D2",
-      bg: "#E3F2FD",
+      label: "Presensi",
+      icon: "person-add-outline",
+      bg: "#FFF5E6",
+      color: "#FF9500",
     },
-    { label: "Perwalian", icon: "people", color: "#388E3C", bg: "#E8F5E9" },
     {
-      label: "Tugas Akhir",
-      icon: "shield-checkmark",
-      color: "#7B1FA2",
-      bg: "#F3E5F5",
+      label: "Aktivitas",
+      icon: "flash-outline",
+      bg: "#FFFFE6",
+      color: "#FFCC00",
     },
-    { label: "Presensi", icon: "person-add", color: "#F57C00", bg: "#FFF3E0" },
-    { label: "Aktivitas", icon: "flash", color: "#FBC02D", bg: "#FFFDE7" },
-    { label: "Kinerja", icon: "bar-chart", color: "#C2185B", bg: "#FCE4EC" },
-    { label: "Lainnya", icon: "grid", color: "#455A64", bg: "#ECEFF1" },
+    {
+      label: "Kinerja",
+      icon: "bar-chart-outline",
+      bg: "#FFF0F5",
+      color: "#D43F8D",
+    },
   ];
 
   return (
@@ -79,7 +108,10 @@ export default function BerandaScreen() {
                 style={styles.searchInput}
               />
             </View>
-            <TouchableOpacity style={styles.notificationBtn}>
+            <TouchableOpacity
+              style={styles.notificationBtn}
+              onPress={() => router.push("/notifikasi")} // Tambahkan baris ini
+            >
               <Ionicons
                 name="notifications-outline"
                 size={22}
@@ -130,31 +162,52 @@ export default function BerandaScreen() {
           </View>
 
           {/* INFORMASI KEGIATAN (KEMBALI DITAMBAHKAN) */}
-          <Text style={styles.subHeading}>Informasi Kegiatan</Text>
-          {[1, 2].map((i) => (
-            <View key={i} style={styles.activityItem}>
-              <View style={styles.iconCircleActivity}>
-                <Ionicons name="megaphone-outline" size={20} color="#00468C" />
-              </View>
-              <View style={{ flex: 1, marginLeft: 15 }}>
-                <Text style={styles.activityTitle}>Rapat Karyawan</Text>
-                <Text style={styles.activityDesc}>
-                  10 April, 09:00 WIB • ICT Center UMM
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Informasi Kegiatan</Text>
+
+            {notifList.length > 0 ? (
+              notifList.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.notifCard}
+                  onPress={() => router.push("/notifikasi")}
+                >
+                  <View style={styles.iconCircle}>
+                    <Ionicons
+                      name="megaphone-outline"
+                      size={20}
+                      color="#00468C"
+                    />
+                  </View>
+                  <View style={{ flex: 1, marginLeft: 15 }}>
+                    <Text style={styles.notifTitle}>{item.judul}</Text>
+                    <Text style={styles.notifSub}>
+                      {item.tanggal} • {item.lokasi}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color="#CCC" />
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.emptyNotifBox}>
+                <Text style={styles.emptyNotifText}>
+                  Tidak ada kegiatan terbaru
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#CCC" />
-            </View>
-          ))}
+            )}
+          </View>
 
           {/* AGENDA MENGAJAR TERDEKAT (KEMBALI DITAMBAHKAN) */}
           {userData?.peran === "dosen" && (
-            <View style={styles.agendaBox}>
+            <View style={styles.agendaContainer}>
               <Text style={styles.agendaTitleHeader}>
                 Agenda Mengajar Terdekat
               </Text>
               <Text style={styles.agendaYear}>Tahun Akademik 2025/2026</Text>
-              {[1, 2].map((i) => (
-                <View key={i} style={styles.agendaCard}>
+
+              {[1, 2].map((item) => (
+                <View key={item} style={styles.agendaCard}>
+                  {/* KEMBALIKAN BAGIAN INI */}
                   <Ionicons name="calendar" size={24} color="#00468C" />
                   <View style={{ flex: 1, marginLeft: 15 }}>
                     <Text style={styles.matkulText}>
@@ -164,8 +217,17 @@ export default function BerandaScreen() {
                       08:00 - 10:00 • Lab. Multimedia
                     </Text>
                   </View>
-                  <TouchableOpacity style={styles.detailBtn}>
-                    <Text style={styles.detailText}>Detail</Text>
+
+                  <TouchableOpacity
+                    style={styles.btnDetail}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/akademik_detail",
+                        params: { id: item },
+                      })
+                    }
+                  >
+                    <Text style={styles.btnText}>Detail</Text>
                   </TouchableOpacity>
                 </View>
               ))}
@@ -179,6 +241,52 @@ export default function BerandaScreen() {
 }
 
 const styles = StyleSheet.create({
+  servicesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap", // Memungkinkan item turun ke baris baru
+    justifyContent: "flex-start", // Item baris kedua mulai dari kiri
+    paddingHorizontal: 10,
+    marginTop: 15,
+  },
+  btnDetail: {
+    backgroundColor: "#F0F0F0", // Warna background tombol
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  btnText: {
+    color: "#00468C", // Warna teks detail
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  menuItem: {
+    width: "25%", // 4 kolom per baris
+    alignItems: "center",
+    marginBottom: 20,
+    paddingVertical: 5,
+  },
+  menuIconBox: {
+    width: 50,
+    height: 50,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    // Soft Shadow agar terlihat natural
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  menuLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
+  },
   blueHeader: {
     backgroundColor: "#00468C",
     padding: 25,
@@ -227,35 +335,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 20,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "bold" },
-  linkText: {
-    color: "#00468C",
-    fontSize: 12,
-    fontWeight: "bold",
-    backgroundColor: "#D6E4F0",
-    padding: 5,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
   menuGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-  },
-  menuItem: { width: "25%", alignItems: "center", marginBottom: 20 },
-  menuIconBox: {
-    width: 55,
-    height: 55,
-    borderRadius: 15,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  menuLabel: {
-    fontSize: 11,
-    textAlign: "center",
-    color: "#333",
-    fontWeight: "500",
   },
   subHeading: { fontSize: 18, fontWeight: "bold", marginVertical: 15 },
   activityItem: {
@@ -280,6 +363,14 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginTop: 10,
   },
+  agendaContainer: {
+    backgroundColor: "#00468C", // Warna Biru Gelap sesuai Gambar 3
+    padding: 20,
+    marginHorizontal: 20,
+    borderRadius: 25,
+    marginTop: 20,
+    marginBottom: 20,
+  },
   agendaTitleHeader: { color: "#FFF", fontSize: 18, fontWeight: "bold" },
   agendaYear: { color: "#FFF", fontSize: 11, opacity: 0.7, marginBottom: 15 },
   agendaCard: {
@@ -297,6 +388,62 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 12,
     borderRadius: 15,
+  },
+  sectionContainer: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    color: "#333",
+  },
+  notifCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    padding: 15,
+    borderRadius: 20,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+  },
+  iconCircle: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    backgroundColor: "#F0F5FA",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notifTitle: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#00468C",
+  },
+  notifSub: {
+    fontSize: 11,
+    color: "#888",
+    marginTop: 2,
+  },
+  linkText: {
+    fontSize: 12,
+    color: "#00468C", // Warna biru agar terlihat seperti link
+    fontWeight: "600",
+  },
+  emptyNotifBox: {
+    backgroundColor: "#F8F9FA",
+    padding: 20,
+    borderRadius: 20,
+    alignItems: "center",
+    borderStyle: "dashed",
+    borderWidth: 1,
+    borderColor: "#DDD",
+  },
+  emptyNotifText: {
+    color: "#AAA",
+    fontSize: 12,
   },
   detailText: { fontSize: 10, fontWeight: "bold", color: "#00468C" },
 });
