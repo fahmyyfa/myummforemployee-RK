@@ -33,6 +33,23 @@ export default function ProfileMain() {
     }
   }
 
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      alert("Gagal Keluar: " + error.message);
+    } else {
+      // Sesi akan dihapus, dan listener di _layout.tsx akan
+      // otomatis membawa user kembali ke /login
+      console.log("Logout berhasil");
+    }
+  }
+
+  // Gunakan fungsi ini pada tombol Keluar Anda:
+  <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+    <Ionicons name="log-out-outline" size={20} color="#c0392b" />
+    <Text style={styles.logoutText}>KELUAR</Text>
+  </TouchableOpacity>;
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerBlue}>

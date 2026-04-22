@@ -1,8 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Session } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -13,15 +11,27 @@ import {
 } from "react-native";
 import { supabase } from "../../lib/supabase";
 
-export default function App() {
-  const [session, setSession] = useState<Session | null>(null);
+export default function BerandaScreen() {
   const [userData, setUserData] = useState<any>(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
-  // 1. DATA MENU (Didefinisikan di sini, di luar return)
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  async function fetchUserData() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    const { data } = await supabase
+      .from("profil")
+      .select("*")
+      .eq("id", session.user.id)
+      .single();
+    if (data) setUserData(data);
+  }
+
   const quickServices = [
     {
       label: "Jadwal Kuliah",
@@ -48,230 +58,109 @@ export default function App() {
     { label: "Lainnya", icon: "grid", color: "#455A64", bg: "#ECEFF1" },
   ];
 
-  useEffect(() => {
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => setSession(session));
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => setSession(session),
-    );
-    return () => authListener.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (session) fetchUserData();
-  }, [session]);
-
-  async function fetchUserData() {
-    if (!session?.user) return;
-    const { data } = await supabase
-      .from("profil")
-      .select("*")
-      .eq("id", session.user.id)
-      .single();
-    if (data) setUserData(data);
-  }
-
-  async function signInWithEmail() {
-    if (!email || !password) return alert("Isi email dan password!");
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) alert("Login Gagal: " + error.message);
-    setLoading(false);
-  }
-
-  // --- TAMPILAN BERANDA (JIKA SUDAH LOGIN) ---
-  if (session) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F7FA" }}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Header Biru & Search */}
-          <View style={styles.blueHeader}>
-            <View style={styles.searchRow}>
-              <View style={styles.searchBar}>
-                <Ionicons name="search" size={18} color="#888" />
-                <TextInput
-                  placeholder="Cari layanan atau fitur tertentu"
-                  style={styles.searchInput}
-                />
-              </View>
-              <TouchableOpacity style={styles.notificationBtn}>
-                <Ionicons
-                  name="notifications-outline"
-                  size={22}
-                  color="#00468C"
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/* User Info Card */}
-            <View style={styles.userCardBeranda}>
-              <Ionicons name="person-circle" size={50} color="#333" />
-              <View style={{ marginLeft: 12 }}>
-                <Text style={styles.userName}>
-                  {userData?.nama_lengkap || "Karyawan UMM"}
-                </Text>
-                <Text style={styles.userNip}>
-                  NIP: {userData?.nip || "000000000000"}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.contentPadding}>
-            {/* 2. AREA LAYANAN CEPAT (REVISI DESAIN) */}
-            <View style={styles.sectionCard}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Layanan Cepat</Text>
-                <TouchableOpacity>
-                  <Text style={styles.linkText}>Lihat Semua</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.menuGrid}>
-                {quickServices.map((item, index) => (
-                  <TouchableOpacity key={index} style={styles.menuItem}>
-                    <View
-                      style={[styles.menuIconBox, { backgroundColor: item.bg }]}
-                    >
-                      <Ionicons
-                        name={item.icon as any}
-                        size={22}
-                        color={item.color}
-                      />
-                    </View>
-                    <Text style={styles.menuLabel}>{item.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Informasi Kegiatan */}
-            <Text style={styles.subHeading}>Informasi Kegiatan</Text>
-            {[1, 2].map((i) => (
-              <View key={i} style={styles.activityItem}>
-                <View style={styles.iconCircleActivity}>
-                  <Ionicons
-                    name="megaphone-outline"
-                    size={20}
-                    color="#00468C"
-                  />
-                </View>
-                <View style={{ flex: 1, marginLeft: 15 }}>
-                  <Text style={styles.activityTitle}>Rapat Karyawan</Text>
-                  <Text style={styles.activityDesc}>
-                    10 April, 09:00 WIB • ICT Center UMM
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#CCC" />
-              </View>
-            ))}
-
-            {/* Agenda Mengajar (Hanya Dosen) */}
-            {userData?.peran === "dosen" && (
-              <View style={styles.agendaBox}>
-                <Text style={styles.agendaTitleHeader}>
-                  Agenda Mengajar Terdekat
-                </Text>
-                <Text style={styles.agendaYear}>Tahun Akademik 2025/2026</Text>
-                {[1, 2].map((i) => (
-                  <View key={i} style={styles.agendaCard}>
-                    <Ionicons name="calendar" size={24} color="#00468C" />
-                    <View style={{ flex: 1, marginLeft: 15 }}>
-                      <Text style={styles.matkulText}>
-                        Pemrograman Berorientasi Objek
-                      </Text>
-                      <Text style={styles.matkulDesc}>
-                        08:00 - 10:00 • Lab. Multimedia
-                      </Text>
-                    </View>
-                    <TouchableOpacity style={styles.detailBtn}>
-                      <Text style={styles.detailText}>Detail</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-          <View style={{ height: 100 }} />
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
-
-  // --- TAMPILAN LOGIN ---
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
-        <View style={styles.headerBlue}>
-          <Text style={styles.headerTitle}>Sistem{"\n"}Kepegawaian</Text>
-          <Text style={styles.headerSubtitle}>
-            Universitas Muhammadiyah Malang
-          </Text>
-        </View>
-        <View style={styles.loginCard}>
-          <Text style={styles.welcomeTitle}>Selamat Datang</Text>
-          <Text style={styles.welcomeDesc}>
-            Masukkan username dan password Anda untuk mengakses portal akademik.
-          </Text>
-          <Text style={styles.label}>USERNAME</Text>
-          <View style={styles.inputContainer}>
-            <Ionicons
-              name="person-outline"
-              size={20}
-              color="#888"
-              style={{ marginRight: 10 }}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Masukkan email"
-              onChangeText={setEmail}
-              value={email}
-              autoCapitalize="none"
-            />
-          </View>
-          <View style={styles.labelRow}>
-            <Text style={styles.label}>PASSWORD</Text>
-            <TouchableOpacity>
-              <Text style={styles.forgotText}>Lupa Password?</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputContainer}>
-            <Ionicons
-              name="lock-closed-outline"
-              size={20}
-              color="#888"
-              style={{ marginRight: 10 }}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Masukkan password"
-              secureTextEntry={!showPassword}
-              onChangeText={setPassword}
-              value={password}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F7FA" }}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* HEADER & USER INFO */}
+        <View style={styles.blueHeader}>
+          <View style={styles.searchRow}>
+            <View style={styles.searchBar}>
+              <Ionicons name="search" size={18} color="#888" />
+              <TextInput
+                placeholder="Cari layanan atau fitur tertentu"
+                style={styles.searchInput}
+              />
+            </View>
+            <TouchableOpacity style={styles.notificationBtn}>
               <Ionicons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={20}
-                color="#888"
+                name="notifications-outline"
+                size={22}
+                color="#00468C"
               />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={signInWithEmail}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Masuk ke Portal</Text>
-            )}
-          </TouchableOpacity>
+          <View style={styles.userCardBeranda}>
+            <Ionicons name="person-circle" size={50} color="#333" />
+            <View style={{ marginLeft: 12 }}>
+              <Text style={styles.userName}>
+                {userData?.nama_lengkap || "Karyawan UMM"}
+              </Text>
+              <Text style={styles.userNip}>NIP: {userData?.nip || "-"}</Text>
+            </View>
+          </View>
         </View>
+
+        <View style={styles.contentPadding}>
+          {/* LAYANAN CEPAT */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Layanan Cepat</Text>
+              <TouchableOpacity>
+                <Text style={styles.linkText}>Lihat Semua</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.menuGrid}>
+              {quickServices.map((item, index) => (
+                <TouchableOpacity key={index} style={styles.menuItem}>
+                  <View
+                    style={[styles.menuIconBox, { backgroundColor: item.bg }]}
+                  >
+                    <Ionicons
+                      name={item.icon as any}
+                      size={22}
+                      color={item.color}
+                    />
+                  </View>
+                  <Text style={styles.menuLabel}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* INFORMASI KEGIATAN (KEMBALI DITAMBAHKAN) */}
+          <Text style={styles.subHeading}>Informasi Kegiatan</Text>
+          {[1, 2].map((i) => (
+            <View key={i} style={styles.activityItem}>
+              <View style={styles.iconCircleActivity}>
+                <Ionicons name="megaphone-outline" size={20} color="#00468C" />
+              </View>
+              <View style={{ flex: 1, marginLeft: 15 }}>
+                <Text style={styles.activityTitle}>Rapat Karyawan</Text>
+                <Text style={styles.activityDesc}>
+                  10 April, 09:00 WIB • ICT Center UMM
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#CCC" />
+            </View>
+          ))}
+
+          {/* AGENDA MENGAJAR TERDEKAT (KEMBALI DITAMBAHKAN) */}
+          {userData?.peran === "dosen" && (
+            <View style={styles.agendaBox}>
+              <Text style={styles.agendaTitleHeader}>
+                Agenda Mengajar Terdekat
+              </Text>
+              <Text style={styles.agendaYear}>Tahun Akademik 2025/2026</Text>
+              {[1, 2].map((i) => (
+                <View key={i} style={styles.agendaCard}>
+                  <Ionicons name="calendar" size={24} color="#00468C" />
+                  <View style={{ flex: 1, marginLeft: 15 }}>
+                    <Text style={styles.matkulText}>
+                      Pemrograman Berorientasi Objek
+                    </Text>
+                    <Text style={styles.matkulDesc}>
+                      08:00 - 10:00 • Lab. Multimedia
+                    </Text>
+                  </View>
+                  <TouchableOpacity style={styles.detailBtn}>
+                    <Text style={styles.detailText}>Detail</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -306,7 +195,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   userCardBeranda: {
-    backgroundColor: "rgba(255,255,255,0.9)",
+    backgroundColor: "#FFF",
     padding: 15,
     borderRadius: 20,
     flexDirection: "row",
@@ -364,6 +253,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
+    elevation: 1,
   },
   iconCircleActivity: {
     backgroundColor: "#F0F4F8",
@@ -397,50 +287,4 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   detailText: { fontSize: 10, fontWeight: "bold", color: "#00468C" },
-  safeArea: { flex: 1, backgroundColor: "#00468C" },
-  headerBlue: {
-    padding: 40,
-    backgroundColor: "#00468C",
-    height: 250,
-    justifyContent: "center",
-  },
-  headerTitle: { fontSize: 32, fontWeight: "900", color: "#fff" },
-  headerSubtitle: { fontSize: 14, color: "#fff", opacity: 0.8 },
-  loginCard: {
-    backgroundColor: "#fff",
-    marginTop: -50,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    padding: 30,
-    flex: 1,
-  },
-  welcomeTitle: { fontSize: 24, fontWeight: "bold", color: "#222" },
-  welcomeDesc: {
-    fontSize: 13,
-    color: "#777",
-    marginVertical: 10,
-    marginBottom: 20,
-  },
-  label: { fontSize: 11, fontWeight: "bold", color: "#aaa", marginBottom: 5 },
-  labelRow: { flexDirection: "row", justifyContent: "space-between" },
-  forgotText: { fontSize: 11, color: "#00468C", fontWeight: "bold" },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F2F4F7",
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    height: 50,
-  },
-  input: { flex: 1, fontSize: 14, color: "#222" },
-  loginButton: {
-    backgroundColor: "#00468C",
-    height: 50,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: { color: "#fff", fontWeight: "bold" },
 });

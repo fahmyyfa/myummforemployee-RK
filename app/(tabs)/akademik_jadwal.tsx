@@ -16,17 +16,22 @@ export default function JadwalRiwayat() {
   const [riwayat, setRiwayat] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchRiwayat = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      const { data } = await supabase
-        .from("riwayat_mengajar")
-        .select("*")
-        .eq("user_id", session?.user.id);
-      setRiwayat(data || []);
+
+      if (session?.user) {
+        const { data, error } = await supabase
+          .from("riwayat_mengajar")
+          .select("*")
+          .eq("user_id", session.user.id); // Pastikan kolom di DB adalah user_id
+
+        if (error) console.error(error);
+        setRiwayat(data || []);
+      }
     };
-    fetch();
+    fetchRiwayat();
   }, []);
 
   return (
