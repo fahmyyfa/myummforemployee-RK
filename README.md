@@ -1,50 +1,45 @@
-# Welcome to your Expo app 👋
+# myUMM for Employee
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplikasi dashboard mobile terintegrasi untuk dosen dan karyawan Universitas Muhammadiyah Malang yang dibangun menggunakan Flutter dan Supabase.
 
-## Get started
+---
 
-1. Install dependencies
+## 🔗 Link Akses Aplikasi
 
+| Nama File / Platform | Tautan (Link) |
+| :--- | :--- |
+| **Source Code** | [GitHub Repository](https://github.com/fahmyyfa/myummforemployee-RK) |
+| **Download APK** | [Google Drive / GitHub Release](LINK_APK_ANDA) |
+| **Online Emulator** | [Appetize.io Demo](LINK_ONLINE_EMULATOR) |
+
+---
+
+## 🚀 Tech Stack
+
+- **Framework:** Flutter
+- **Language:** Dart
+- **State Management:** Riverpod
+- **Navigation:** go_router
+- **Backend:** Supabase (Auth, PostgreSQL, Storage)
+
+---
+
+## 🧪 Pengujian Kualitas Aplikasi (Daily Project 6)
+
+Pengujian ini dilakukan berdasarkan aspek kualitas perangkat lunak (ISO 25010) untuk memastikan sistem berjalan sesuai spesifikasi teknis.
+
+| Aspek Kualitas | Skenario Pengujian | Hasil yang Diharapkan | Hasil Aktual | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Functional Suitability** | Melakukan presensi melalui scan QR Code di lokasi kerja. | Sistem berhasil mencatat koordinat dan jam kehadiran ke database. | Sesuai Harapan | ✅ Pass |
+| **Usability** | Navigasi menu Jadwal Kuliah dan pemilihan semester. | Pengguna dapat menemukan jadwal spesifik dalam kurang dari 3 klik. | Sesuai Harapan | ✅ Pass |
+| **Performance Efficiency** | Memuat data "Informasi Kegiatan" dari Supabase. | Data muncul di dashboard dalam waktu kurang dari 2 detik. | Sesuai Harapan | ✅ Pass |
+| **Security** | Mengakses halaman profil tanpa sesi login yang valid. | Sistem otomatis menolak akses dan mengarahkan kembali ke halaman Login. | Sesuai Harapan | ✅ Pass |
+| **Maintainability** | Integrasi kode antar modul (Aktivitas & Kinerja). | Penambahan data di modul Aktivitas otomatis memperbarui skor di modul Kinerja. | Sesuai Harapan | ✅ Pass |
+
+---
+
+## 🛠 Cara Menjalankan Secara Lokal
+
+1. Clone repository ini:
    ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+   git clone [https://github.com/USERNAME/REPO_NAME.git](https://github.com/USERNAME/REPO_NAME.git)
