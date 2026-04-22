@@ -42,4 +42,4 @@ Pengujian ini dilakukan berdasarkan aspek kualitas perangkat lunak (ISO 25010) u
 
 1. Clone repository ini:
    ```bash
-   git clone [https://github.com/USERNAME/REPO_NAME.git](https://github.com/USERNAME/REPO_NAME.git)
+   git clone [https://github.com/fahmyyfa/myummforemployee-RK.git]([https://github.com/USERNAME/REPO_NAME.git](https://github.com/fahmyyfa/myummforemployee-RK.git))
