@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
@@ -12,7 +13,14 @@ import {
 import { supabase } from "../../lib/supabase";
 
 export default function BerandaScreen() {
+  const router = useRouter(); // Tambahkan baris ini
   const [userData, setUserData] = useState<any>(null);
+
+  const handleServicePress = (label: string) => {
+    if (label === "Presensi") {
+      router.push("/presensi_kehadiran");
+    }
+  };
 
   useEffect(() => {
     fetchUserData();
@@ -101,7 +109,11 @@ export default function BerandaScreen() {
             </View>
             <View style={styles.menuGrid}>
               {quickServices.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.menuItem}>
+                <TouchableOpacity
+                  key={index}
+                  style={styles.menuItem}
+                  onPress={() => handleServicePress(item.label)} // Tambahkan ini
+                >
                   <View
                     style={[styles.menuIconBox, { backgroundColor: item.bg }]}
                   >

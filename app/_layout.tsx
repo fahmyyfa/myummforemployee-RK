@@ -30,14 +30,18 @@ export default function RootLayout() {
     if (!initialized) return;
 
     const inTabsGroup = segments[0] === "(tabs)";
+    const isAuthPage = segments[0] === "login";
+    // Tambahkan pengecualian untuk halaman yang boleh diakses meski di luar tabs
+    const isPublicOrSuccessPage = segments[0] === "scan_success";
 
-    if (!session && inTabsGroup) {
-      // Jika session habis tapi masih di dalam tabs, paksa ke login
+    if (!session && !isAuthPage) {
+      // Jika tidak ada session dan bukan di halaman login, paksa ke login
       router.replace("/login");
-    } else if (session && !inTabsGroup) {
-      // Jika session ada tapi masih di luar tabs (login), paksa ke beranda
+    } else if (session && isAuthPage) {
+      // Jika ada session tapi di halaman login, pindah ke tabs
       router.replace("/(tabs)");
     }
+    // Hapus logika "else if (session && !inTabsGroup)" yang lama agar tidak memaksa kembali ke beranda
   }, [session, initialized, segments]);
 
   return (

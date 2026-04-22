@@ -109,6 +109,13 @@ export default function TabLayout() {
           href: null, // Ini akan menyembunyikan dari navbar
         }}
       />
+
+      <Tabs.Screen
+        name="presensi_kehadiran"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

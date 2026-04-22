@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -32,12 +33,21 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
-        <View style={styles.headerBlue}>
-          <Text style={styles.headerTitle}>Sistem{"\n"}Kepegawaian</Text>
-          <Text style={styles.headerSubtitle}>
-            Universitas Muhammadiyah Malang
-          </Text>
-        </View>
+        {/* HEADER DENGAN BACKGROUND GAMBAR UMM */}
+        <ImageBackground
+          source={require("../assets/images/bg-umm.jpg")}
+          style={styles.headerBg}
+          resizeMode="cover"
+        >
+          <View style={styles.overlay}>
+            <Text style={styles.headerTitle}>Sistem{"\n"}Kepegawaian</Text>
+            <Text style={styles.headerSubtitle}>
+              Universitas Muhammadiyah Malang
+            </Text>
+          </View>
+        </ImageBackground>
+
+        {/* LOGIN CARD */}
         <View style={styles.loginCard}>
           <Text style={styles.welcomeTitle}>Selamat Datang</Text>
           <Text style={styles.welcomeDesc}>
@@ -48,13 +58,13 @@ export default function LoginScreen() {
           <View style={styles.inputContainer}>
             <Ionicons
               name="person-outline"
-              size={20}
+              size={18}
               color="#888"
               style={{ marginRight: 10 }}
             />
             <TextInput
               style={styles.input}
-              placeholder="Masukkan email"
+              placeholder="Masukkan username"
               onChangeText={setEmail}
               value={email}
               autoCapitalize="none"
@@ -70,7 +80,7 @@ export default function LoginScreen() {
           <View style={styles.inputContainer}>
             <Ionicons
               name="lock-closed-outline"
-              size={20}
+              size={18}
               color="#888"
               style={{ marginRight: 10 }}
             />
@@ -101,6 +111,34 @@ export default function LoginScreen() {
               <Text style={styles.buttonText}>Masuk ke Portal</Text>
             )}
           </TouchableOpacity>
+
+          {/* LAYANAN LAINNYA DIVIDER */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.line} />
+            <Text style={styles.dividerText}>LAYANAN LAINNYA</Text>
+            <View style={styles.line} />
+          </View>
+
+          {/* GRID LAYANAN LAINNYA */}
+          <View style={styles.otherServicesGrid}>
+            <TouchableOpacity style={styles.serviceBtn}>
+              <View style={styles.iconCircleBlue}>
+                <Ionicons name="mail-outline" size={24} color="#00468C" />
+              </View>
+              <Text style={styles.serviceLabel}>Buat Email Baru</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.serviceBtn}>
+              <View style={styles.iconCircleBlue}>
+                <Ionicons name="key-outline" size={24} color="#00468C" />
+              </View>
+              <Text style={styles.serviceLabel}>Reset Password</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.copyrightText}>
+            © 2026 Universitas Muhammadiyah Malang
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -108,18 +146,33 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#00468C" },
-  headerBlue: {
+  safeArea: { flex: 1, backgroundColor: "#FFF" },
+  headerBg: { width: "100%", height: 300 },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 70, 140, 0.4)",
     padding: 40,
-    backgroundColor: "#00468C",
-    height: 250,
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 32, fontWeight: "900", color: "#fff" },
-  headerSubtitle: { fontSize: 14, color: "#fff", opacity: 0.8 },
+  headerTitle: {
+    fontSize: 47,
+    fontWeight: "900",
+    color: "#fff",
+    lineHeight: 40,
+    letterSpacing: 2,
+  },
+
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "300",
+    lineHeight: 20,
+    letterSpacing: 4,
+    marginTop: 20,
+  },
   loginCard: {
     backgroundColor: "#fff",
-    marginTop: -50,
+    marginTop: -40,
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     padding: 30,
@@ -130,7 +183,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#777",
     marginVertical: 10,
-    marginBottom: 20,
+    marginBottom: 25,
   },
   label: { fontSize: 11, fontWeight: "bold", color: "#aaa", marginBottom: 5 },
   labelRow: { flexDirection: "row", justifyContent: "space-between" },
@@ -139,7 +192,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F2F4F7",
-    borderRadius: 12,
+    borderRadius: 15,
     paddingHorizontal: 15,
     marginBottom: 15,
     height: 50,
@@ -147,11 +200,52 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 14, color: "#222" },
   loginButton: {
     backgroundColor: "#00468C",
-    height: 50,
-    borderRadius: 12,
+    height: 55,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
+    elevation: 5,
+    shadowColor: "#00468C",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
   },
-  buttonText: { color: "#fff", fontWeight: "bold" },
+  buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 30,
+  },
+  line: { flex: 1, height: 1, backgroundColor: "#EEE" },
+  dividerText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#CCC",
+    marginHorizontal: 15,
+  },
+  otherServicesGrid: { flexDirection: "row", justifyContent: "space-between" },
+  serviceBtn: {
+    width: "48%",
+    backgroundColor: "#F8F9FA",
+    padding: 20,
+    borderRadius: 20,
+    alignItems: "center",
+  },
+  iconCircleBlue: {
+    backgroundColor: "#E3F2FD",
+    width: 50,
+    height: 50,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  serviceLabel: { fontSize: 11, fontWeight: "bold", color: "#00468C" },
+  copyrightText: {
+    textAlign: "center",
+    color: "#CCC",
+    fontSize: 11,
+    marginTop: 40,
+    marginBottom: 20,
+  },
 });
