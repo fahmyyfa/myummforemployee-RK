@@ -8,9 +8,9 @@ Aplikasi dashboard mobile terintegrasi untuk dosen dan karyawan Universitas Muha
 
 | Nama File / Platform | Tautan (Link) |
 | :--- | :--- |
-| **Source Code** | [GitHub Repository](https://github.com/fahmyyfa/myummforemployee-RK) |
-| **Download APK** | [Google Drive / GitHub Release](LINK_APK_ANDA) |
-| **Online Emulator** | [Appetize.io Demo](LINK_ONLINE_EMULATOR) |
+| **Source Code** | [GitHub Repository] https://github.com/fahmyyfa/myummforemployee-RK |
+| **Download APK** | [Google Drive / GitHub Release] https://drive.google.com/drive/folders/1WeNhkpm-2olqGaamuOhK2sLb1jmFmf1j?usp=sharing |
+| **Online Emulator** | [Appetize.io Demo] https://appetize.io/app/b_ons2rfihc3hrk3tvzehpocqkdy |
 
 ---
 
