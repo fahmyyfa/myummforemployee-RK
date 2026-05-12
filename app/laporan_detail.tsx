@@ -10,79 +10,9 @@ import {
   View,
 } from "react-native";
 
-export default function LaporanDetail() {
-  const router = useRouter();
-  const { matkulId } = useLocalSearchParams();
-  const [category, setCategory] = useState("Persebaran"); // Default kategori
+import { REPORT_CATEGORIES } from "./constants";
+import { useMatkulData } from "./useMatkulData";
 
-  const categories = [
-    { id: "Persebaran", label: "Persebaran Nilai" },
-    { id: "CPMK", label: "Penilaian Sub CPMK" },
-    { id: "Materi", label: "Evaluasi Materi" },
-    { id: "CPL", label: "Ketercapaian CPL" },
-    { id: "Jurnal", label: "Jurnal Mengajar" },
-    { id: "Kinerja", label: "Kinerja Dosen" },
-  ];
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* HEADER */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Detail Laporan</Text>
-        <TouchableOpacity>
-          <Ionicons name="download-outline" size={22} color="#00468C" />
-        </TouchableOpacity>
-      </View>
-
-      {/* METADATA RINGKAS */}
-      <View style={styles.metaCard}>
-        <Text style={styles.matkulName}>Pemrograman Mobile (3 SKS)</Text>
-        <Text style={styles.metaSub}>
-          Dr. Ahmad Wijaya • Kelas A • Ganjil 2024/2025
-        </Text>
-      </View>
-
-      {/* HORIZONTAL CATEGORY SELECTOR */}
-      <View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.pillScroll}
-        >
-          {categories.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[styles.pill, category === item.id && styles.pillActive]}
-              onPress={() => setCategory(item.id)}
-            >
-              <Text
-                style={[
-                  styles.pillText,
-                  category === item.id && styles.pillTextActive,
-                ]}
-              >
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      <ScrollView style={styles.content}>
-        {/* LOGIKA TAMPILAN BERDASARKAN KATEGORI */}
-        {category === "Persebaran" && <ReportPersebaran />}
-        {category === "CPMK" && <ReportCPMK />}
-        {category === "Materi" && <ReportMateri />}
-        {/* Tambahkan kategori lainnya sesuai pola ini */}
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-// SUB-KOMPONEN UNTUK MENYEDERHANAKAN ISI
 const ReportPersebaran = () => (
   <View style={styles.reportBox}>
     <Text style={styles.reportTitle}>Tabel Persebaran Nilai</Text>
@@ -114,7 +44,6 @@ const ReportCPMK = () => (
         <Text style={styles.statVal}>3.41</Text>
       </View>
     </View>
-    {/* Tabel NIM, Nama, dll bisa diletakkan di sini */}
   </View>
 );
 
@@ -125,16 +54,115 @@ const ReportMateri = () => (
   </View>
 );
 
+type IReportComponent = React.FC;
+
+const REPORT_CONTENT_MAP: Record<string, IReportComponent> = {
+  Persebaran: ReportPersebaran,
+  CPMK: ReportCPMK,
+  Materi: ReportMateri,
+};
+
+export default function LaporanDetail() {
+  const router = useRouter();
+
+  const { matkulId } = useLocalSearchParams();
+  const idString = Array.isArray(matkulId) ? matkulId[0] : (matkulId ?? "");
+
+  const { matkul } = useMatkulData(idString);
+  const [category, setCategory] = useState("Persebaran");
+
+  const ActiveReportComponent = REPORT_CONTENT_MAP[category];
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Detail Laporan</Text>
+        <TouchableOpacity>
+          <Ionicons name="download-outline" size={22} color="#00468C" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.selectorContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.pillScroll}
+        >
+          {REPORT_CATEGORIES.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={[styles.pill, category === item.id && styles.pillActive]}
+              onPress={() => setCategory(item.id)}
+            >
+              <Text
+                style={[
+                  styles.pillText,
+                  category === item.id && styles.pillTextActive,
+                ]}
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      <View style={styles.metaCard}>
+        {matkul ? (
+          <>
+            <Text style={styles.matkulName}>
+              {matkul.nama} ({matkul.sks} SKS)
+            </Text>
+            <Text style={styles.metaSub}>
+              {matkul.dosen} | {matkul.kelas} | {matkul.semester}
+            </Text>
+          </>
+        ) : (
+          <Text style={styles.matkulName}>Memuat data...</Text>
+        )}
+      </View>
+
+      <View style={styles.content}>
+        {ActiveReportComponent ? (
+          <ActiveReportComponent />
+        ) : (
+          <Text style={styles.emptyText}>
+            Laporan untuk kategori "{category}" belum tersedia.
+          </Text>
+        )}
+      </View>
+    </SafeAreaView>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F8F9FA" },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
     paddingTop: 50,
     backgroundColor: "#FFF",
   },
   headerTitle: { fontSize: 16, fontWeight: "bold" },
+  selectorContainer: { backgroundColor: "#FFF", paddingBottom: 10 },
+  pillScroll: { paddingLeft: 20 },
+  pill: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#EEE",
+    backgroundColor: "#FFF",
+  },
+  pillActive: { backgroundColor: "#00468C", borderColor: "#00468C" },
+  pillText: { fontSize: 12, color: "#666" },
+  pillTextActive: { color: "#FFF", fontWeight: "bold" },
   metaCard: {
     backgroundColor: "#00468C",
     padding: 20,
@@ -143,25 +171,16 @@ const styles = StyleSheet.create({
   },
   matkulName: { color: "#FFF", fontSize: 18, fontWeight: "bold" },
   metaSub: { color: "rgba(255,255,255,0.7)", fontSize: 11, marginTop: 5 },
-  pillScroll: { paddingLeft: 20, marginBottom: 10 },
-  pill: {
-    backgroundColor: "#FFF",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: "#EEE",
-  },
-  pillActive: { backgroundColor: "#00468C", borderColor: "#00468C" },
-  pillText: { fontSize: 12, color: "#666" },
-  pillTextActive: { color: "#FFF", fontWeight: "bold" },
-  content: { flex: 1, padding: 20 },
+  content: { flex: 1, paddingHorizontal: 20 },
   reportBox: {
     backgroundColor: "#FFF",
     padding: 20,
     borderRadius: 15,
-    elevation: 1,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   reportTitle: {
     fontSize: 14,
@@ -185,4 +204,5 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 10, color: "#888" },
   statVal: { fontSize: 18, fontWeight: "bold", color: "#00468C" },
   infoText: { fontSize: 12, color: "#666", lineHeight: 20 },
+  emptyText: { textAlign: "center", color: "#888", marginTop: 20 },
 });
