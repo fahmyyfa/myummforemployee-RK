@@ -54,7 +54,9 @@ const ReportMateri = () => (
   </View>
 );
 
-const REPORT_CONTENT_MAP: Record<string, React.FC> = {
+type IReportComponent = React.FC;
+
+const REPORT_CONTENT_MAP: Record<string, IReportComponent> = {
   Persebaran: ReportPersebaran,
   CPMK: ReportCPMK,
   Materi: ReportMateri,
