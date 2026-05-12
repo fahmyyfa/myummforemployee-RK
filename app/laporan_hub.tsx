@@ -25,6 +25,43 @@ export default function LaporanHubScreen() {
     fetchDinamis();
   }, [activeTab, matkulId]);
 
+  const TAB_CONFIG = {
+  Persebaran: {
+    table: "laporan_detail_nilai",
+    orderBy: "huruf",
+  },
+  CPMK: {
+    table: "laporan_sub_cpmk",
+  },
+  CPL: {
+    table: "laporan_sub_cpmk",
+  },
+  Materi: {
+    table: "laporan_evaluasi_materi",
+    orderBy: "pertemuan",
+  },
+  Jurnal: {
+    table: "laporan_jurnal_mengajar",
+    orderBy: "pertemuan",
+  },
+  };
+
+  const config = TAB_CONFIG[activeTab as keyof typeof TAB_CONFIG];
+
+    if (config) {
+    let query = supabase
+        .from(config.table)
+        .select("*")
+        .eq("laporan_id", matkulId);
+
+    if (config.orderBy) {
+        query = query.order(config.orderBy);
+    }
+
+    const { data } = await query;
+    setDataDetail(data || []);
+    }
+
   const fetchDinamis = async () => {
     setLoading(true);
     const { data: meta } = await supabase
@@ -35,29 +72,6 @@ export default function LaporanHubScreen() {
     setDataMeta(meta);
 
     let res: any;
-    if (activeTab === "Persebaran")
-      res = await supabase
-        .from("laporan_detail_nilai")
-        .select("*")
-        .eq("laporan_id", matkulId)
-        .order("huruf");
-    else if (activeTab === "CPMK" || activeTab === "CPL")
-      res = await supabase
-        .from("laporan_sub_cpmk")
-        .select("*")
-        .eq("laporan_id", matkulId);
-    else if (activeTab === "Materi")
-      res = await supabase
-        .from("laporan_evaluasi_materi")
-        .select("*")
-        .eq("laporan_id", matkulId)
-        .order("pertemuan");
-    else if (activeTab === "Jurnal")
-      res = await supabase
-        .from("laporan_jurnal_mengajar")
-        .select("*")
-        .eq("laporan_id", matkulId)
-        .order("pertemuan");
 
     setDataDetail(res?.data || []);
     setLoading(false);
