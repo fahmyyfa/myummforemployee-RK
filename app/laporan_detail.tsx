@@ -24,6 +24,15 @@ export default function LaporanDetail() {
     { id: "Kinerja", label: "Kinerja Dosen" },
   ];
 
+  const ActiveReportComponent = REPORT_CONTENT_MAP[category];
+
+  const REPORT_CONTENT_MAP: Record<string, React.FC> = {
+    Persebaran: ReportPersebaran,
+    CPMK: ReportCPMK,
+    Materi: ReportMateri,
+    // CPL: ReportCPL,
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* HEADER */}
@@ -71,13 +80,14 @@ export default function LaporanDetail() {
         </ScrollView>
       </View>
 
-      <ScrollView style={styles.content}>
-        {/* LOGIKA TAMPILAN BERDASARKAN KATEGORI */}
-        {category === "Persebaran" && <ReportPersebaran />}
-        {category === "CPMK" && <ReportCPMK />}
-        {category === "Materi" && <ReportMateri />}
-        {/* Tambahkan kategori lainnya sesuai pola ini */}
-      </ScrollView>
+      {/* test */}
+      {ActiveReportComponent ? (
+        <ActiveReportComponent />
+      ) : (
+        <Text style={{ textAlign: "center", color: "#888", marginTop: 20 }}>
+          Laporan untuk kategori "{category}" belum tersedia.
+        </Text>
+      )}
     </SafeAreaView>
   );
 }
