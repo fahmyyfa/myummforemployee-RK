@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router"; // Import ini wajib ada
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import React from "react";
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -10,39 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { supabase } from "../lib/supabase"; // Pastikan path benar
+import { useRiwayatLaporan } from "../hooks/useRiwayatLaporan"; // disini perubahannya pak
 
 export default function LaporanSemester() {
   const router = useRouter();
-  const [riwayat, setRiwayat] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchRiwayat();
-  }, []);
-
-  const fetchRiwayat = async () => {
-    setLoading(true);
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data, error } = await supabase
-          .from("riwayat_mengajar")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .order("tahun_akademik", { ascending: false });
-
-        if (error) throw error;
-        setRiwayat(data || []);
-      }
-    } catch (error) {
-      console.error("Fetch Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  
+  const { riwayat, loading, error } = useRiwayatLaporan();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -66,6 +39,13 @@ export default function LaporanSemester() {
 
         <Text style={styles.sectionTitle}>Tahun Akademik</Text>
 
+        {/* Tampilkan pesan error jika ada */}
+        {error && (
+          <Text style={{ color: "red", textAlign: "center", marginBottom: 10 }}>
+            {error}
+          </Text>
+        )}
+
         {loading ? (
           <ActivityIndicator
             size="large"
@@ -78,11 +58,6 @@ export default function LaporanSemester() {
               key={item.id}
               style={styles.card}
               onPress={() => {
-                console.log(
-                  "Mengirim data:",
-                  item.tahun_akademik,
-                  item.semester,
-                ); // Debugging}
                 router.push({
                   pathname: "/laporan_matkul",
                   params: {
