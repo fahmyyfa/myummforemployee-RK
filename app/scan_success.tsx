@@ -8,23 +8,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { supabase } from "../lib/supabase";
+
+import { useUserProfile } from "../hooks/useUserProfile";
 
 export default function ScanSuccess() {
   const { kegiatan } = useLocalSearchParams();
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      supabase
-        .from("profil")
-        .select("*")
-        .eq("id", session?.user.id)
-        .single()
-        .then(({ data }) => setUser(data));
-    });
-  }, []);
+  
+  const {user} = useUserProfile();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F8F9FA" }}>
